@@ -1,0 +1,21 @@
+# 로컬 개발용 최소 설정. `supabase init`으로 전체 설정을 만들어도 된다.
+project_id = "work-together"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000"]
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[storage]
+file_size_limit = "10MiB"

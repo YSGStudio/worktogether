@@ -13,6 +13,15 @@ export async function withAssignees(supabase: SupabaseClient, rows: TaskRow[]): 
   return rows.map((t) => ({ ...t, assignee_ids: by[t.id] ?? [] }));
 }
 
+// 할 일을 담당자와 함께 한 번에 읽을 때의 select. 담당자는 RLS가 할 일과 같게 거른다.
+export const TASK_WITH_ASSIGNEES = "*, task_assignees(student_id)";
+
+type TaskRowWithAssignees = TaskRow & { task_assignees: { student_id: string }[] | null };
+
+export function fromTaskRows(rows: TaskRowWithAssignees[]): Task[] {
+  return rows.map(({ task_assignees, ...t }) => ({ ...t, assignee_ids: (task_assignees ?? []).map((a) => a.student_id) }));
+}
+
 export function assigneeLabel(task: Pick<Task, "assignee_ids">, names: Record<string, string>): string {
   if (task.assignee_ids.length === 0) return "미배정";
   return task.assignee_ids.map((id) => names[id] ?? "?").join(", ");

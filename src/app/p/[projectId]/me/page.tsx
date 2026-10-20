@@ -3,9 +3,8 @@ import { StatusToggle } from "@/components/StatusToggle";
 import { Card, Empty, formatRange, OverdueBadge, SectionTitle } from "@/components/ui";
 import { isOverdue, sortByDueDate, todayKST } from "@/lib/domain/dates";
 import { loadProject, nameMap, scopeLabel } from "@/lib/project";
-import { assigneeLabel, withAssignees } from "@/lib/assignees";
+import { assigneeLabel, fromTaskRows, TASK_WITH_ASSIGNEES } from "@/lib/assignees";
 import { createClient } from "@/lib/supabase/server";
-import type { Task } from "@/lib/types";
 
 // 내 할 일: 나에게 배정된 것만 마감일 순
 export default async function MyTasks({ params }: PageProps<"/p/[projectId]/me">) {
@@ -19,8 +18,8 @@ export default async function MyTasks({ params }: PageProps<"/p/[projectId]/me">
     .eq("project_id", projectId)
     .eq("student_id", ctx.me.id);
   const ids = (mine ?? []).map((r) => r.task_id as string);
-  const { data } = ids.length ? await supabase.from("tasks").select("*").in("id", ids) : { data: [] };
-  const tasks = sortByDueDate(await withAssignees(supabase, (data ?? []) as Task[]));
+  const { data } = ids.length ? await supabase.from("tasks").select(TASK_WITH_ASSIGNEES).in("id", ids) : { data: [] };
+  const tasks = sortByDueDate(fromTaskRows(data ?? []));
   const names = nameMap(ctx);
   const today = todayKST();
   return (

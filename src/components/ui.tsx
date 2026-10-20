@@ -21,6 +21,17 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   return <section className={`rounded-2xl border border-[#e2e4ef] bg-white p-4 shadow-[0_5px_18px_rgba(45,47,68,0.07)] sm:p-5 ${className}`}>{children}</section>;
 }
 
+// loading.tsx 공통: 화면을 불러오는 동안 바로 보여 주는 뼈대
+export function LoadingPanel() {
+  return (
+    <div role="status" aria-label="불러오는 중" className="animate-pulse space-y-4">
+      <div className="h-8 w-1/3 rounded-xl bg-[#e6e8f3]" />
+      <div className="h-32 rounded-2xl bg-[#eceef6]" />
+      <div className="h-56 rounded-2xl bg-[#eceef6]" />
+    </div>
+  );
+}
+
 export function PageTitle({ children, sub }: { children: ReactNode; sub?: ReactNode }) {
   return (
     <div className="mb-5 border-b border-[#e3e5ee] pb-3">

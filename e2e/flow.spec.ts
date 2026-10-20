@@ -87,7 +87,7 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
 
   // 4. 학생 추가와 모둠
   await teacher.goto(riverUrl.replace(/\/p\/([^/]+).*/, "/p/$1/members"));
-  for (const n of ["서연", "유나", "하준"]) await teacher.getByLabel(n, { exact: true }).check();
+  for (const n of ["서연", "유나", "하준"]) await teacher.locator("fieldset").filter({ hasText: "고른 학생 추가" }).getByLabel(n, { exact: true }).check();
   await teacher.getByRole("button", { name: "고른 학생 추가" }).click();
   await expect(teacher.getByText("3명을 추가했어요")).toBeVisible();
 
@@ -97,7 +97,7 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
   const parkUrl = teacher.url();
   await teacher.goto(`${parkUrl}/members`);
   await expect(teacher.getByText("(하천 쓰레기 조사팀 소속)").first()).toBeVisible();
-  for (const n of ["도윤", "예린", "시우", "다은", "지안"]) await teacher.getByLabel(n, { exact: true }).check();
+  for (const n of ["도윤", "예린", "시우", "다은", "지안"]) await teacher.locator("fieldset").filter({ hasText: "고른 학생 추가" }).getByLabel(n, { exact: true }).check();
   await teacher.getByRole("button", { name: "고른 학생 추가" }).click();
   await teacher.getByLabel("새 모둠 이름").fill("1모둠");
   await teacher.getByRole("button", { name: "모둠 만들기" }).click();
@@ -151,7 +151,7 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
     mimeType: "image/png",
     buffer: Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a5b10000000049454e44ae426082", "hex"),
   });
-  await seoyeon.getByRole("button", { name: "올리기" }).click();
+  await seoyeon.getByRole("button", { name: "올리기", exact: true }).click();
   await expect(seoyeon.getByText("파일을 올렸어요")).toBeVisible();
 
   // 2모둠 시우는 1모둠 할 일을 볼 수 없다
@@ -164,7 +164,7 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
   await minjun.goto(`${riverUrl}/notices`);
   await minjun.getByLabel("제목").fill("내일 사진 모으기");
   await minjun.getByLabel("내용").fill("각자 찍은 사진을 올려 주세요");
-  await minjun.getByRole("button", { name: "올리기" }).click();
+  await minjun.getByRole("button", { name: "올리기", exact: true }).click();
   await seoyeon.goto(`${riverUrl}/notices`);
   await seoyeon.getByLabel("댓글").fill("네 알겠어요");
   await seoyeon.getByRole("button", { name: "등록" }).click();

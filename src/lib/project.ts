@@ -24,20 +24,20 @@ export type ProjectContext = {
 
 // 방 화면 공통 데이터. RLS가 막으면 404.
 export const loadProject = cache(async (projectId: string): Promise<ProjectContext> => {
-  const me = await requireUser();
   const supabase = await createClient();
-  const { data: project } = await supabase.from("projects").select("*").eq("id", projectId).maybeSingle();
-  if (!project) notFound();
-
-  const [{ data: topic }, { data: groups }, { data: memberRows }, { data: groupMemberRows }, { data: leaderRows }] = await Promise.all([
-    supabase.from("topics").select("*").eq("id", project.topic_id).single(),
+  // 모두 projectId만 있으면 되므로 한 번에 보낸다. 방을 볼 수 없으면 RLS가 전부 비운다.
+  const [me, { data: projectRow }, { data: groups }, { data: memberRows }, { data: groupMemberRows }, { data: leaderRows }] = await Promise.all([
+    requireUser(),
+    supabase.from("projects").select("*, topics(*)").eq("id", projectId).maybeSingle(),
     supabase.from("groups").select("*").eq("project_id", projectId).order("created_at"),
     supabase.from("project_members").select("student_id, profiles(id, name)").eq("project_id", projectId),
     supabase.from("group_members").select("group_id, student_id").eq("project_id", projectId),
     supabase.from("project_leaders").select("student_id").eq("project_id", projectId),
   ]);
-  const leaderIds = (leaderRows ?? []).map((r) => r.student_id as string);
+  if (!projectRow) notFound();
+  const { topics: topic, ...project } = projectRow as Project & { topics: Topic | null };
   if (!topic) notFound();
+  const leaderIds = (leaderRows ?? []).map((r) => r.student_id as string);
 
   const members: Member[] = (memberRows ?? [])
     .map((r) => {

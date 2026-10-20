@@ -13,19 +13,21 @@ import { toGalleryItems } from "@/lib/gallery";
 import { editableScopes, loadProject, nameMap, scopeLabel } from "@/lib/project";
 import { createClient } from "@/lib/supabase/server";
 import { loadAttachments } from "@/lib/workspace";
-import { assigneeLabel, withAssignees } from "@/lib/assignees";
-import type { Task } from "@/lib/types";
+import { assigneeLabel, fromTaskRows, TASK_WITH_ASSIGNEES } from "@/lib/assignees";
 
 export default async function TaskDetail({ params }: PageProps<"/p/[projectId]/tasks/[taskId]">) {
   const { projectId, taskId } = await params;
   const ctx = await loadProject(projectId);
   const supabase = await createClient();
   // 볼 수 없는 범위의 할 일은 RLS가 막아 404가 된다(다른 모둠 할 일 직접 링크 포함)
-  const { data } = await supabase.from("tasks").select("*").eq("id", taskId).eq("project_id", projectId).maybeSingle();
+  const [{ data }, attachments] = await Promise.all([
+    supabase.from("tasks").select(TASK_WITH_ASSIGNEES).eq("id", taskId).eq("project_id", projectId).maybeSingle(),
+    loadAttachments([taskId]),
+  ]);
   if (!data) notFound();
-  const [task] = await withAssignees(supabase, [data as Task]);
+  const [task] = fromTaskRows([data]);
   const names = nameMap(ctx);
-  const items = await toGalleryItems(await loadAttachments([task.id]), [task], names);
+  const items = await toGalleryItems(attachments, [task], names);
   const canEdit = canEditScope(ctx.scope, task.group_id);
   const canStatus = canChangeStatus(ctx.scope, task, ctx.me.id);
   const scopes = editableScopes(ctx);

@@ -6,18 +6,22 @@ import { Card, formatDateTime, formatRange, Progress, SectionTitle } from "@/com
 import { todayKST } from "@/lib/domain/dates";
 import { assigneeLabel } from "@/lib/assignees";
 import { toGalleryItems } from "@/lib/gallery";
-import { loadProject, scopeLabel } from "@/lib/project";
-import { loadAttachments, loadNotices, loadWorkspace } from "@/lib/workspace";
+import { loadProject, resolveView, scopeLabel } from "@/lib/project";
+import { loadNotices, loadProjectAttachments, loadWorkspace } from "@/lib/workspace";
 
 export default async function Dashboard({ params, searchParams }: PageProps<"/p/[projectId]">) {
   const { projectId } = await params;
   const sp = await searchParams;
   const one = (v: string | string[] | undefined) => (typeof v === "string" && v ? v : undefined);
   const ctx = await loadProject(projectId);
-  const ws = await loadWorkspace(ctx, one(sp.view));
+  const [ws, notices, projectAttachments] = await Promise.all([
+    loadWorkspace(ctx, one(sp.view)),
+    loadNotices(ctx, resolveView(ctx, one(sp.view)), 3),
+    loadProjectAttachments(projectId),
+  ]);
   const today = todayKST();
-  const [attachments, notices] = await Promise.all([loadAttachments(ws.tasks.map((t) => t.id)), loadNotices(ctx, ws.view, 3)]);
-  const items = await toGalleryItems(attachments, ws.tasks, ws.names);
+  const visibleTaskIds = new Set(ws.tasks.map((t) => t.id));
+  const items = await toGalleryItems(projectAttachments.filter((a) => visibleTaskIds.has(a.task_id)), ws.tasks, ws.names);
   const done = ws.tasks.filter((t) => t.status === "done").length;
   const base = `/p/${projectId}`;
 

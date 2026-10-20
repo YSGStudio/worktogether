@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { withAssignees } from "@/lib/assignees";
+import { fromTaskRows, TASK_WITH_ASSIGNEES } from "@/lib/assignees";
 import { canViewScope } from "@/lib/domain/scope";
 import { nameMap, resolveView, type ProjectContext } from "@/lib/project";
 import type { Attachment, Notice, Task } from "@/lib/types";
@@ -20,12 +20,12 @@ export async function loadWorkspace(ctx: ProjectContext, viewParam?: string): Pr
   const supabase = await createClient();
   const { data } = await supabase
     .from("tasks")
-    .select("*")
+    .select(TASK_WITH_ASSIGNEES)
     .eq("project_id", ctx.project.id)
     .order("sort_order")
     .order("created_at");
   const view = resolveView(ctx, viewParam);
-  let tasks = (await withAssignees(supabase, (data ?? []) as Task[])).filter((t) => canViewScope(ctx.scope, t.group_id));
+  let tasks = fromTaskRows(data ?? []).filter((t) => canViewScope(ctx.scope, t.group_id));
   if (view) tasks = tasks.filter((t) => t.group_id === null || t.group_id === view);
 
   let sections: WorkspaceSection[];
@@ -56,6 +56,17 @@ export async function loadAttachments(taskIds: string[]): Promise<Attachment[]> 
     .from("task_attachments")
     .select("*")
     .in("task_id", taskIds)
+    .order("created_at", { ascending: false });
+  return (data ?? []) as Attachment[];
+}
+
+// 방의 첨부 전체. 할 일 목록과 동시에 읽고, 보이는 할 일 것만 남기는 건 호출하는 쪽이 한다.
+export async function loadProjectAttachments(projectId: string): Promise<Attachment[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("task_attachments")
+    .select("*, tasks!inner()")
+    .eq("tasks.project_id", projectId)
     .order("created_at", { ascending: false });
   return (data ?? []) as Attachment[];
 }

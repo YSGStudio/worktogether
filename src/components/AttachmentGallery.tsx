@@ -4,7 +4,7 @@ import { formatDateTime } from "./ui";
 
 export type GalleryItem = Attachment & { href: string | null; taskTitle: string; uploaderName: string };
 
-const KIND_LABEL = { image: "이미지", pdf: "PDF", link: "링크" } as const;
+const KIND_LABEL = { image: "이미지", pdf: "PDF", link: "링크", text: "글" } as const;
 
 // 자료 모음: 이미지는 썸네일, PDF·링크는 아이콘. 할 일별·종류별 필터는 쿼리스트링으로.
 export function AttachmentGallery({
@@ -42,6 +42,7 @@ export function AttachmentGallery({
             <option value="image">이미지</option>
             <option value="pdf">PDF</option>
             <option value="link">링크</option>
+            <option value="text">글</option>
           </select>
         </label>
         <button className="rounded-md border border-stone-300 bg-white px-3 py-1 text-sm">거르기</button>
@@ -52,6 +53,12 @@ export function AttachmentGallery({
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" data-testid="gallery">
           {shown.map((a) => (
             <li key={a.id} className="min-w-0 overflow-hidden rounded-lg border border-stone-200 bg-white">
+              {a.kind === "text" ? (
+                // 글은 할 일 화면에서 전체를 읽는다
+                <Link href={`${basePath.replace(/\/$/, "")}/tasks/${a.task_id}`} className="block h-28 overflow-hidden bg-[#f7f8fb] p-2 text-xs whitespace-pre-wrap break-words text-stone-700 hover:bg-[#f0f1ff]">
+                  {a.body}
+                </Link>
+              ) : (
               <a href={a.href ?? "#"} target="_blank" rel="noopener noreferrer" className="block">
                 {a.kind === "image" && a.href ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -62,6 +69,7 @@ export function AttachmentGallery({
                   </div>
                 )}
               </a>
+              )}
               <div className="p-2 text-xs">
                 <p className="truncate font-semibold" title={a.file_name}>
                   <span className="mr-1 text-stone-500">[{KIND_LABEL[a.kind]}]</span>

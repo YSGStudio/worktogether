@@ -45,3 +45,17 @@ export function validateLink(input: string): LinkCheck {
 export function safeFileName(name: string): string {
   return name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").slice(0, 200) || "file";
 }
+
+export const MAX_TEXT_RESULT = 5000;
+
+export type TextResultCheck = { ok: true; title: string; body: string } | { ok: false; error: string };
+
+// 글 결과물: 제목을 비우면 본문 첫 줄(40자)을 제목으로 쓴다
+export function validateTextResult(input: { title: string; body: string }): TextResultCheck {
+  const body = input.body.trim();
+  if (!body) return { ok: false, error: "결과물 내용을 적어 주세요" };
+  if (body.length > MAX_TEXT_RESULT) return { ok: false, error: `글은 ${MAX_TEXT_RESULT}자 이하로 적어 주세요` };
+  const firstLine = body.split("\n")[0].trim();
+  const title = (input.title.trim() || (firstLine.length > 40 ? `${firstLine.slice(0, 40)}…` : firstLine)).slice(0, 200);
+  return { ok: true, title, body };
+}

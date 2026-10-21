@@ -6,6 +6,7 @@ import { deleteComment, deleteNotice } from "@/actions/notices";
 import { deleteTask } from "@/actions/tasks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { StatusToggle } from "@/components/StatusToggle";
+import { AttachmentTitle } from "@/components/StudentWorkView";
 import { BackLink, btn, Card, Empty, formatDateTime, formatRange, OverdueBadge, PageTitle, SectionTitle } from "@/components/ui";
 import { isOverdue, todayKST } from "@/lib/domain/dates";
 import { loadStudentWork } from "@/lib/studentWork";
@@ -71,10 +72,12 @@ export default async function StudentWorkPage({ params }: PageProps<"/teacher/to
                       {w.uploads.map((a) => (
                         <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-stone-200 p-2 text-sm">
                           <span className="min-w-0">
-                            <a href={a.href ?? "#"} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-800 hover:underline break-all">{a.file_name}</a>
+                            {a.kind === "text" && <span className="mr-1 text-xs text-stone-500">[글]</span>}
+                            <AttachmentTitle a={a} className="font-semibold text-blue-800 hover:underline break-all" />
                             <span className="text-stone-500"> · {a.taskTitle} · {formatDateTime(a.created_at)}</span>
+                            {a.kind === "text" && <span className="mt-1 line-clamp-3 block whitespace-pre-wrap break-words text-stone-700">{a.body}</span>}
                           </span>
-                          <ConfirmButton action={deleteAttachment.bind(null, a.id)} confirm={`"${a.file_name}"을(를) 지울까요? 파일도 함께 지워져요.`}>삭제</ConfirmButton>
+                          <ConfirmButton action={deleteAttachment.bind(null, a.id)} confirm={a.kind === "text" ? `"${a.file_name}" 글을 지울까요?` : `"${a.file_name}"을(를) 지울까요? 파일도 함께 지워져요.`}>삭제</ConfirmButton>
                         </li>
                       ))}
                     </ul>

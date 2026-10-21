@@ -52,9 +52,10 @@ export type Task = {
 export type Attachment = {
   id: string;
   task_id: string;
-  kind: "pdf" | "image" | "link";
+  kind: "pdf" | "image" | "link" | "text";
   storage_path: string | null;
   url: string | null;
+  body: string | null; // 글 결과물 본문(kind = "text")
   file_name: string;
   mime_type: string | null;
   size_bytes: number | null;

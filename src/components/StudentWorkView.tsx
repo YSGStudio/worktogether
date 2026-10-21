@@ -1,6 +1,12 @@
 import Link from "next/link";
-import type { StudentWork } from "@/lib/studentWork";
+import type { StudentWork, WorkAttachment } from "@/lib/studentWork";
 import { formatDateTime, formatRange, StatusBadge } from "./ui";
+
+// 글 결과물은 할 일 화면으로, 파일·링크는 새 창으로 연다
+export function AttachmentTitle({ a, className }: { a: WorkAttachment; className: string }) {
+  if (a.kind === "text") return <Link href={`/p/${a.projectId}/tasks/${a.task_id}`} className={className}>{a.file_name}</Link>;
+  return <a href={a.href ?? "#"} target="_blank" rel="noopener noreferrer" className={className}>{a.file_name}</a>;
+}
 
 // 학생이 한 일을 시간순으로 보여준다(활동 표 펼침, 학생 작업 화면 공용)
 export function StudentWorkTimeline({ work }: { work: StudentWork }) {
@@ -23,7 +29,7 @@ export function StudentWorkTimeline({ work }: { work: StudentWork }) {
                 <ul className="mt-1 ml-3 list-disc">
                   {t.attachments.map((a) => (
                     <li key={a.id}>
-                      <a href={a.href ?? "#"} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">{a.file_name}</a>
+                      <AttachmentTitle a={a} className="text-blue-700 hover:underline" />
                     </li>
                   ))}
                 </ul>
@@ -35,9 +41,10 @@ export function StudentWorkTimeline({ work }: { work: StudentWork }) {
           const a = uploads.get(e.id)!;
           return (
             <li key={`a-${e.id}`} className="rounded-md bg-white p-2">
-              <span className="mr-1 text-xs text-stone-500">{formatDateTime(e.at)} · 자료</span>
-              <a href={a.href ?? "#"} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-800 hover:underline">{a.file_name}</a>
+              <span className="mr-1 text-xs text-stone-500">{formatDateTime(e.at)} · {a.kind === "text" ? "글" : "자료"}</span>
+              <AttachmentTitle a={a} className="font-semibold text-blue-800 hover:underline" />
               <span className="text-stone-600"> ({a.taskTitle})</span>
+              {a.kind === "text" && <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-stone-700">{a.body}</p>}
             </li>
           );
         }

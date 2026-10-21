@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { loadProject } from "@/lib/project";
 import { canEditScope } from "@/lib/domain/scope";
-import { safeFileName, validateLink, validateUpload } from "@/lib/domain/upload";
+import { safeFileName, validateLink, validateTextResult, validateUpload } from "@/lib/domain/upload";
 import { friendlyError } from "@/lib/errors";
 import { str } from "@/lib/form";
 import { withAssignees } from "@/lib/assignees";
@@ -82,6 +82,24 @@ export async function addLink(taskId: string, _prev: unknown, fd: FormData): Pro
   if (error) return { ok: false, error: friendlyError(error) };
   refresh(found.task.project_id);
   return { ok: true, message: "링크를 올렸어요" };
+}
+
+export async function addTextResult(taskId: string, _prev: unknown, fd: FormData): Promise<ActionResult> {
+  const found = await contributableTask(taskId);
+  if (!found) return { ok: false, error: "담당자만 결과물을 올릴 수 있어요" };
+  const text = validateTextResult({ title: str(fd, "title"), body: str(fd, "body") });
+  if (!text.ok) return { ok: false, error: text.error };
+  const supabase = await createClient();
+  const { error } = await supabase.from("task_attachments").insert({
+    task_id: taskId,
+    kind: "text",
+    body: text.body,
+    file_name: text.title,
+    uploaded_by: found.ctx.me.id,
+  });
+  if (error) return { ok: false, error: friendlyError(error) };
+  refresh(found.task.project_id);
+  return { ok: true, message: "글을 올렸어요" };
 }
 
 // 올린 사람과 교사만 지운다. DB 행과 Storage 객체를 함께 지운다.

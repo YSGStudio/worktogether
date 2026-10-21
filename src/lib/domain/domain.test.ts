@@ -14,7 +14,7 @@ import {
 import { axisTicks, computeBar, todayPosition } from "./timeline";
 import { canChangeStatus, canEditScope, canViewScope, type ScopeContext } from "./scope";
 import { buildAiUserPrompt, parseAiResponse } from "./ai";
-import { MAX_FILE_BYTES, validateLink, validateUpload } from "./upload";
+import { MAX_FILE_BYTES, MAX_TEXT_RESULT, validateLink, validateTextResult, validateUpload } from "./upload";
 
 describe("학급코드", () => {
   it("숫자 6자리로 만든다", () => {
@@ -291,5 +291,29 @@ describe("업로드 검증", () => {
     expect(validateLink("javascript:alert(1)").ok).toBe(false);
     expect(validateLink("ftp://example.com").ok).toBe(false);
     expect(validateLink("example.com").ok).toBe(false);
+  });
+});
+
+describe("글 결과물", () => {
+  it("빈 내용은 거절한다", () => {
+    expect(validateTextResult({ title: "제목", body: "   \n " }).ok).toBe(false);
+  });
+  it("너무 긴 글은 거절한다", () => {
+    expect(validateTextResult({ title: "", body: "가".repeat(MAX_TEXT_RESULT + 1) }).ok).toBe(false);
+  });
+  it("제목이 없으면 첫 줄을 제목으로 쓴다", () => {
+    expect(validateTextResult({ title: " ", body: "  하천에서 쓰레기 12개를 주웠다\n자세한 내용" })).toEqual({
+      ok: true,
+      title: "하천에서 쓰레기 12개를 주웠다",
+      body: "하천에서 쓰레기 12개를 주웠다\n자세한 내용",
+    });
+  });
+  it("첫 줄이 길면 40자에서 자른다", () => {
+    const r = validateTextResult({ title: "", body: "나".repeat(60) });
+    expect(r.ok && r.title).toBe(`${"나".repeat(40)}…`);
+  });
+  it("적은 제목을 그대로 쓴다", () => {
+    const r = validateTextResult({ title: "조사 결과", body: "내용" });
+    expect(r.ok && r.title).toBe("조사 결과");
   });
 });

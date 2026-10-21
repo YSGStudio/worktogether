@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { addLink, uploadAttachment } from "@/actions/attachments";
+import { addLink, addTextResult, uploadAttachment } from "@/actions/attachments";
 import { deleteTask, updateTask } from "@/actions/tasks";
 import { ActionForm } from "@/components/ActionForm";
 import { AttachmentList } from "@/components/AttachmentList";
@@ -8,6 +8,7 @@ import { StatusToggle } from "@/components/StatusToggle";
 import { TaskForm } from "@/components/TaskForm";
 import { BackLink, btn, Card, Field, formatRange, input, OverdueBadge, SectionTitle } from "@/components/ui";
 import { isOverdue, todayKST } from "@/lib/domain/dates";
+import { MAX_TEXT_RESULT } from "@/lib/domain/upload";
 import { canChangeStatus, canEditScope } from "@/lib/domain/scope";
 import { toGalleryItems } from "@/lib/gallery";
 import { editableScopes, loadProject, nameMap, scopeLabel } from "@/lib/project";
@@ -60,6 +61,13 @@ export default async function TaskDetail({ params }: PageProps<"/p/[projectId]/t
             <AttachmentList items={items} meId={ctx.me.id} isTeacher={ctx.scope.isTeacher} />
             {canStatus && (
               <div className="mt-4 grid gap-4 border-t pt-4 md:grid-cols-2">
+                <ActionForm action={addTextResult.bind(null, task.id)} resetOnSuccess className="space-y-2 md:col-span-2">
+                  <Field label="글로 남기기" hint={`한 일, 알게 된 점, 조사 내용 등을 적어 주세요. ${MAX_TEXT_RESULT}자 이하.`}>
+                    <textarea name="body" required rows={5} maxLength={MAX_TEXT_RESULT} placeholder="오늘 한 일과 결과를 적어 주세요" className={input} />
+                  </Field>
+                  <input name="title" maxLength={200} placeholder="제목 (비우면 첫 줄이 제목이 돼요)" className={input} aria-label="글 제목" />
+                  <button className={btn.primary}>글 올리기</button>
+                </ActionForm>
                 <ActionForm action={uploadAttachment.bind(null, task.id)} resetOnSuccess className="space-y-2">
                   <Field label="파일 올리기" hint="PDF, 이미지(PNG·JPG·WEBP·GIF), 10MB 이하. 개인정보가 담긴 사진은 올리지 마세요.">
                     <input type="file" name="file" required accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,application/pdf,image/png,image/jpeg,image/webp,image/gif" className="block w-full text-sm" />

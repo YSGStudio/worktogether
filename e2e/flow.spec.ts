@@ -153,6 +153,10 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
   });
   await seoyeon.getByRole("button", { name: "올리기", exact: true }).click();
   await expect(seoyeon.getByText("파일을 올렸어요")).toBeVisible();
+  await seoyeon.getByLabel("글로 남기기").fill("하천에서 쓰레기 12개를 주웠다\n플라스틱이 가장 많았다");
+  await seoyeon.getByRole("button", { name: "글 올리기" }).click();
+  await expect(seoyeon.getByText("글을 올렸어요")).toBeVisible();
+  await expect(seoyeon.getByTestId("attachment-list").getByText("플라스틱이 가장 많았다")).toBeVisible();
 
   // 2모둠 시우는 1모둠 할 일을 볼 수 없다
   const siwoo = await (await browser.newContext()).newPage();

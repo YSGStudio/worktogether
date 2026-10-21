@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { loadProject } from "@/lib/project";
 import { studentRooms } from "@/lib/studentRooms";
+import { RoomSwitcher } from "@/components/RoomSwitcher";
 import { Main, TopBar } from "@/components/TopBar";
 import { Badge, formatRange } from "@/components/ui";
 
@@ -53,20 +54,7 @@ export default async function ProjectLayout({ children, params }: LayoutProps<"/
                 {formatRange(project.start_date, project.end_date)} · 팀장 {ctx.leaderNames.join(", ") || "없음"}
               </p>
             </div>
-            {switchList.length > 1 && (
-              <details className="relative">
-                <summary className="cursor-pointer rounded-xl border-2 border-[#d9dcef] px-3 py-1.5 text-sm font-bold text-[#4c4f68] hover:border-[#aeb4f8] hover:bg-[#f5f6ff]">다른 방 보기</summary>
-                <ul className="absolute right-0 z-20 mt-2 max-h-72 w-64 max-w-[80vw] overflow-auto rounded-xl border border-[#dfe1eb] bg-white py-1 shadow-xl">
-                  {switchList.map((r) => (
-                    <li key={r.id}>
-                      <Link href={`/p/${r.id}`} className={`block truncate px-3 py-2 text-sm hover:bg-[#f0f1ff] ${r.id === projectId ? "font-bold text-[#5865f2]" : ""}`}>
-                        {r.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
+            {switchList.length > 1 && <RoomSwitcher rooms={switchList} currentId={projectId} />}
           </div>
           <nav className="mt-3 flex gap-1.5 overflow-x-auto pb-0">
             {nav.map((n) => (

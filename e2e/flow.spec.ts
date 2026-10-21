@@ -169,6 +169,7 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
   await minjun.getByLabel("제목").fill("내일 사진 모으기");
   await minjun.getByLabel("내용").fill("각자 찍은 사진을 올려 주세요");
   await minjun.getByRole("button", { name: "올리기", exact: true }).click();
+  await expect(minjun.getByText("공지를 올렸어요")).toBeVisible();
   await seoyeon.goto(`${riverUrl}/notices`);
   await seoyeon.getByLabel("댓글").fill("네 알겠어요");
   await seoyeon.getByRole("button", { name: "등록" }).click();

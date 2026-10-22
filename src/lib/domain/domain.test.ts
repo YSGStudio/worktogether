@@ -14,7 +14,7 @@ import {
 import { axisTicks, computeBar, todayPosition } from "./timeline";
 import { canChangeStatus, canEditScope, canViewScope, type ScopeContext } from "./scope";
 import { buildAiUserPrompt, parseAiResponse } from "./ai";
-import { MAX_FILE_BYTES, MAX_TEXT_RESULT, validateLink, validateTextResult, validateUpload } from "./upload";
+import { MAX_FILE_BYTES, MAX_LINKS, MAX_TEXT_RESULT, validateLink, validateLinks, validateTextResult, validateUpload } from "./upload";
 
 describe("학급코드", () => {
   it("숫자 6자리로 만든다", () => {
@@ -291,6 +291,37 @@ describe("업로드 검증", () => {
     expect(validateLink("javascript:alert(1)").ok).toBe(false);
     expect(validateLink("ftp://example.com").ok).toBe(false);
     expect(validateLink("example.com").ok).toBe(false);
+  });
+});
+
+describe("링크 여러 개", () => {
+  it("빈 칸은 건너뛰고 이름이 없으면 도메인을 쓴다", () => {
+    const r = validateLinks([
+      { url: "https://a.example.com/x", title: "자료" },
+      { url: "", title: "" },
+      { url: " https://b.example.com ", title: "" },
+    ]);
+    expect(r).toEqual({
+      ok: true,
+      links: [
+        { url: "https://a.example.com/x", title: "자료" },
+        { url: "https://b.example.com/", title: "b.example.com" },
+      ],
+    });
+  });
+  it("모두 비었으면 거절한다", () => {
+    expect(validateLinks([{ url: " ", title: "" }]).ok).toBe(false);
+  });
+  it("잘못된 링크가 몇 번째인지 알려준다", () => {
+    const r = validateLinks([{ url: "https://a.com", title: "" }, { url: "a.com", title: "" }]);
+    expect(r.ok === false && r.error).toMatch(/^2번째 링크/);
+  });
+  it("이름만 있고 주소가 없으면 거절한다", () => {
+    expect(validateLinks([{ url: "", title: "이름만" }]).ok).toBe(false);
+  });
+  it("개수 한도를 넘으면 거절한다", () => {
+    const rows = Array.from({ length: MAX_LINKS + 1 }, (_, i) => ({ url: `https://e.com/${i}`, title: "" }));
+    expect(validateLinks(rows).ok).toBe(false);
   });
 });
 

@@ -42,6 +42,25 @@ export function validateLink(input: string): LinkCheck {
   return { ok: true, url: url.toString() };
 }
 
+export const MAX_FILES = 10;
+export const MAX_LINKS = 10;
+
+export type LinksCheck = { ok: true; links: { url: string; title: string }[] } | { ok: false; error: string };
+
+// 링크 여러 개: 주소와 이름이 모두 빈 칸은 건너뛰고, 이름 없이 주소만 있으면 도메인을 이름으로 쓴다
+export function validateLinks(rows: { url: string; title: string }[]): LinksCheck {
+  const filled = rows.map((r) => ({ url: r.url.trim(), title: r.title.trim() })).filter((r) => r.url || r.title);
+  if (filled.length === 0) return { ok: false, error: "링크 주소를 입력하세요" };
+  if (filled.length > MAX_LINKS) return { ok: false, error: `링크는 한 번에 ${MAX_LINKS}개까지 올릴 수 있어요` };
+  const links: { url: string; title: string }[] = [];
+  for (const [i, r] of filled.entries()) {
+    const link = validateLink(r.url);
+    if (!link.ok) return { ok: false, error: filled.length > 1 ? `${i + 1}번째 링크: ${link.error}` : link.error };
+    links.push({ url: link.url, title: (r.title || new URL(link.url).hostname).slice(0, 200) });
+  }
+  return { ok: true, links };
+}
+
 export function safeFileName(name: string): string {
   return name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").slice(0, 200) || "file";
 }

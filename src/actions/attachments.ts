@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { loadProject } from "@/lib/project";
 import { canEditScope } from "@/lib/domain/scope";
-import { safeFileName, validateLink, validateTextResult, validateUpload } from "@/lib/domain/upload";
+import { safeFileName, validateLinks, validateTextResult, validateUpload } from "@/lib/domain/upload";
 import { friendlyError } from "@/lib/errors";
 import { str } from "@/lib/form";
 import { withAssignees } from "@/lib/assignees";
@@ -68,20 +68,17 @@ export async function uploadAttachment(taskId: string, _prev: unknown, fd: FormD
 export async function addLink(taskId: string, _prev: unknown, fd: FormData): Promise<ActionResult> {
   const found = await contributableTask(taskId);
   if (!found) return { ok: false, error: "담당자만 결과물을 올릴 수 있어요" };
-  const link = validateLink(str(fd, "url"));
-  if (!link.ok) return { ok: false, error: link.error };
-  const title = str(fd, "title") || new URL(link.url).hostname;
+  // url·title 칸이 짝지어 여러 줄로 온다
+  const titles = fd.getAll("title").map(String);
+  const check = validateLinks(fd.getAll("url").map((url, i) => ({ url: String(url), title: titles[i] ?? "" })));
+  if (!check.ok) return { ok: false, error: check.error };
   const supabase = await createClient();
-  const { error } = await supabase.from("task_attachments").insert({
-    task_id: taskId,
-    kind: "link",
-    url: link.url,
-    file_name: title.slice(0, 200),
-    uploaded_by: found.ctx.me.id,
-  });
+  const { error } = await supabase.from("task_attachments").insert(
+    check.links.map((l) => ({ task_id: taskId, kind: "link", url: l.url, file_name: l.title, uploaded_by: found.ctx.me.id })),
+  );
   if (error) return { ok: false, error: friendlyError(error) };
   refresh(found.task.project_id);
-  return { ok: true, message: "링크를 올렸어요" };
+  return { ok: true, message: check.links.length > 1 ? `링크 ${check.links.length}개를 올렸어요` : "링크를 올렸어요" };
 }
 
 export async function addTextResult(taskId: string, _prev: unknown, fd: FormData): Promise<ActionResult> {

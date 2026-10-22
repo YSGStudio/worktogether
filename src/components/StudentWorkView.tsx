@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { StudentWork, WorkAttachment } from "@/lib/studentWork";
+import { CopyButton } from "./CopyButton";
 import { formatDateTime, formatRange, StatusBadge } from "./ui";
 
 // 글 결과물은 할 일 화면으로, 파일·링크는 새 창으로 연다
@@ -44,7 +45,14 @@ export function StudentWorkTimeline({ work }: { work: StudentWork }) {
               <span className="mr-1 text-xs text-stone-500">{formatDateTime(e.at)} · {a.kind === "text" ? "글" : "자료"}</span>
               <AttachmentTitle a={a} className="font-semibold text-blue-800 hover:underline" />
               <span className="text-stone-600"> ({a.taskTitle})</span>
-              {a.kind === "text" && <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-stone-700">{a.body}</p>}
+              {a.kind === "text" && a.body && (
+                <>
+                  <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-stone-700">{a.body}</p>
+                  <div className="mt-1">
+                    <CopyButton text={a.body} />
+                  </div>
+                </>
+              )}
             </li>
           );
         }

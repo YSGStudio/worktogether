@@ -1,6 +1,7 @@
 import { deleteAttachment } from "@/actions/attachments";
 import type { GalleryItem } from "./AttachmentGallery";
 import { ConfirmButton } from "./ConfirmButton";
+import { CopyButton } from "./CopyButton";
 import { btn, formatDateTime } from "./ui";
 
 const KIND = { image: "이미지", pdf: "PDF", link: "링크", text: "글" } as const;
@@ -38,11 +39,14 @@ export function AttachmentList({ items, meId, isTeacher }: { items: GalleryItem[
               </p>
             </div>
           </div>
-          {(a.uploaded_by === meId || isTeacher) && (
-            <ConfirmButton action={deleteAttachment.bind(null, a.id)} confirm={`"${a.file_name}"을(를) 지울까요?`} className={btn.danger}>
-              삭제
-            </ConfirmButton>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {a.kind === "text" && a.body && <CopyButton text={a.body} />}
+            {(a.uploaded_by === meId || isTeacher) && (
+              <ConfirmButton action={deleteAttachment.bind(null, a.id)} confirm={`"${a.file_name}"을(를) 지울까요?`} className={btn.danger}>
+                삭제
+              </ConfirmButton>
+            )}
+          </div>
         </li>
       ))}
     </ul>

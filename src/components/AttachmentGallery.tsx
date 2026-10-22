@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Attachment } from "@/lib/types";
+import { CopyButton } from "./CopyButton";
 import { formatDateTime } from "./ui";
 
 export type GalleryItem = Attachment & { href: string | null; taskTitle: string; uploaderName: string };
@@ -83,6 +84,11 @@ export function AttachmentGallery({
                 <p className="truncate text-stone-500">
                   {a.uploaderName} · {formatDateTime(a.created_at)}
                 </p>
+                {a.kind === "text" && a.body && (
+                  <div className="mt-1.5">
+                    <CopyButton text={a.body} />
+                  </div>
+                )}
               </div>
             </li>
           ))}

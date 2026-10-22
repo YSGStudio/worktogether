@@ -5,6 +5,7 @@ import { deleteAttachment } from "@/actions/attachments";
 import { deleteComment, deleteNotice } from "@/actions/notices";
 import { deleteTask } from "@/actions/tasks";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { CopyButton } from "@/components/CopyButton";
 import { StatusToggle } from "@/components/StatusToggle";
 import { AttachmentTitle } from "@/components/StudentWorkView";
 import { BackLink, btn, Card, Empty, formatDateTime, formatRange, OverdueBadge, PageTitle, SectionTitle } from "@/components/ui";
@@ -77,7 +78,10 @@ export default async function StudentWorkPage({ params }: PageProps<"/teacher/to
                             <span className="text-stone-500"> · {a.taskTitle} · {formatDateTime(a.created_at)}</span>
                             {a.kind === "text" && <span className="mt-1 line-clamp-3 block whitespace-pre-wrap break-words text-stone-700">{a.body}</span>}
                           </span>
-                          <ConfirmButton action={deleteAttachment.bind(null, a.id)} confirm={a.kind === "text" ? `"${a.file_name}" 글을 지울까요?` : `"${a.file_name}"을(를) 지울까요? 파일도 함께 지워져요.`}>삭제</ConfirmButton>
+                          <span className="flex shrink-0 items-center gap-2">
+                            {a.kind === "text" && a.body && <CopyButton text={a.body} />}
+                            <ConfirmButton action={deleteAttachment.bind(null, a.id)} confirm={a.kind === "text" ? `"${a.file_name}" 글을 지울까요?` : `"${a.file_name}"을(를) 지울까요? 파일도 함께 지워져요.`}>삭제</ConfirmButton>
+                          </span>
                         </li>
                       ))}
                     </ul>

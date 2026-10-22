@@ -29,7 +29,7 @@ export default async function TasksPage({ params, searchParams }: PageProps<"/p/
               <SectionTitle>
                 {s.title} <span className="text-sm font-normal text-stone-500">{s.tasks.length}개</span>
               </SectionTitle>
-              <TaskList tasks={s.tasks} names={ws.names} today={today} hrefFor={(t) => `${base}/tasks/${t.id}`} />
+              <TaskList tasks={s.tasks} names={ws.names} today={today} hrefFor={(t) => `${base}/tasks/${t.id}`} grid={ctx.me.role === "student"} />
             </Card>
           ))}
         </div>

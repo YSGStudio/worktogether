@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusToggle } from "@/components/StatusToggle";
+import { TASK_GRID, TASK_TILE } from "@/components/TaskList";
 import { Card, Empty, formatRange, OverdueBadge, SectionTitle } from "@/components/ui";
 import { isOverdue, sortByDueDate, todayKST } from "@/lib/domain/dates";
 import { loadProject, nameMap, scopeLabel } from "@/lib/project";
@@ -28,9 +29,9 @@ export default async function MyTasks({ params }: PageProps<"/p/[projectId]/me">
       {tasks.length === 0 ? (
         <Empty>나에게 배정된 할 일이 없어요</Empty>
       ) : (
-        <ul className="divide-y divide-stone-100" data-testid="my-tasks">
+        <ul className={TASK_GRID} data-testid="my-tasks">
           {tasks.map((t) => (
-            <li key={t.id} className="flex flex-col gap-2 py-3 md:flex-row md:items-center md:justify-between">
+            <li key={t.id} className={TASK_TILE}>
               <div className="min-w-0">
                 <Link href={`/p/${projectId}/tasks/${t.id}`} className="text-lg font-semibold text-blue-800 hover:underline break-words">
                   {t.title}

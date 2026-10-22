@@ -57,32 +57,39 @@ export default async function TaskDetail({ params }: PageProps<"/p/[projectId]/t
           </Card>
 
           <Card>
-            <SectionTitle>결과물</SectionTitle>
-            <AttachmentList items={items} meId={ctx.me.id} isTeacher={ctx.scope.isTeacher} />
             {canStatus && (
-              <div className="mt-4 grid gap-4 border-t pt-4 md:grid-cols-2">
-                <ActionForm action={addTextResult.bind(null, task.id)} resetOnSuccess className="space-y-2 md:col-span-2">
+              <div>
+                <SectionTitle>내 결과물 올리기</SectionTitle>
+                <ActionForm action={addTextResult.bind(null, task.id)} resetOnSuccess className="space-y-3">
                   <Field label="글로 남기기" hint={`한 일, 알게 된 점, 조사 내용 등을 적어 주세요. ${MAX_TEXT_RESULT}자 이하.`}>
-                    <textarea name="body" required rows={5} maxLength={MAX_TEXT_RESULT} placeholder="오늘 한 일과 결과를 적어 주세요" className={input} />
+                    <textarea name="body" required rows={7} maxLength={MAX_TEXT_RESULT} placeholder="오늘 한 일과 결과를 적어 주세요" className={`${input} resize-y`} />
                   </Field>
                   <input name="title" maxLength={200} placeholder="제목 (비우면 첫 줄이 제목이 돼요)" className={input} aria-label="글 제목" />
                   <button className={btn.primary}>글 올리기</button>
                 </ActionForm>
-                <ActionForm action={uploadAttachment.bind(null, task.id)} resetOnSuccess className="space-y-2">
-                  <Field label="파일 올리기" hint="PDF, 이미지(PNG·JPG·WEBP·GIF), 10MB 이하. 개인정보가 담긴 사진은 올리지 마세요.">
-                    <input type="file" name="file" required accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,application/pdf,image/png,image/jpeg,image/webp,image/gif" className="block w-full text-sm" />
-                  </Field>
-                  <button className={btn.primary}>올리기</button>
-                </ActionForm>
-                <ActionForm action={addLink.bind(null, task.id)} resetOnSuccess className="space-y-2">
-                  <Field label="링크 올리기">
-                    <input name="url" type="url" required placeholder="https://" className={input} />
-                  </Field>
-                  <input name="title" maxLength={200} placeholder="링크 이름 (선택)" className={input} aria-label="링크 이름" />
-                  <button className={btn.secondary}>링크 추가</button>
-                </ActionForm>
+
+                <div className="mt-5 grid gap-4 border-t border-stone-200 pt-5 md:grid-cols-2">
+                  <ActionForm action={uploadAttachment.bind(null, task.id)} resetOnSuccess className="space-y-3 rounded-xl bg-[#f8f8fc] p-4">
+                    <Field label="파일 첨부" hint="PDF, 이미지(PNG·JPG·WEBP·GIF), 10MB 이하. 개인정보가 담긴 사진은 올리지 마세요.">
+                      <input type="file" name="file" required accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,application/pdf,image/png,image/jpeg,image/webp,image/gif" className="block w-full text-sm" />
+                    </Field>
+                    <button className={btn.secondary}>파일 올리기</button>
+                  </ActionForm>
+                  <ActionForm action={addLink.bind(null, task.id)} resetOnSuccess className="space-y-3 rounded-xl bg-[#f8f8fc] p-4">
+                    <Field label="링크 첨부">
+                      <input name="url" type="url" required placeholder="https://" className={input} />
+                    </Field>
+                    <input name="title" maxLength={200} placeholder="링크 이름 (선택)" className={input} aria-label="링크 이름" />
+                    <button className={btn.secondary}>링크 추가</button>
+                  </ActionForm>
+                </div>
               </div>
             )}
+
+            <div className={canStatus ? "mt-6 border-t border-stone-200 pt-5" : ""}>
+              <SectionTitle>올린 결과물</SectionTitle>
+              <AttachmentList items={items} meId={ctx.me.id} isTeacher={ctx.scope.isTeacher} />
+            </div>
           </Card>
         </div>
 

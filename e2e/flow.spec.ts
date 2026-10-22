@@ -151,7 +151,7 @@ test("대표 흐름: 학급 → 주제 → 방 → 모둠 → 할 일 → 학생
     mimeType: "image/png",
     buffer: Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a5b10000000049454e44ae426082", "hex"),
   });
-  await seoyeon.getByRole("button", { name: "올리기", exact: true }).click();
+  await seoyeon.getByRole("button", { name: "파일 올리기" }).click();
   await expect(seoyeon.getByText("파일을 올렸어요")).toBeVisible();
   await seoyeon.getByLabel("글로 남기기").fill("하천에서 쓰레기 12개를 주웠다\n플라스틱이 가장 많았다");
   await seoyeon.getByRole("button", { name: "글 올리기" }).click();
